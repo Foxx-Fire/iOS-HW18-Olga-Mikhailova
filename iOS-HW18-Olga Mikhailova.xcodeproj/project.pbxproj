@@ -14,7 +14,7 @@
 		0B515D372E203B1B00BE982B /* Exceptions for "iOS-HW18-Olga Mikhailova" folder in "iOS-HW18-Olga Mikhailova" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Info.plist,
+				Resources/Info.plist,
 			);
 			target = 0B515D242E203B1700BE982B /* iOS-HW18-Olga Mikhailova */;
 		};
@@ -146,8 +146,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 58NQ7DA6UP;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "iOS-HW18-Olga Mikhailova/Info.plist";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "iOS-HW18-Olga Mikhailova/Resources/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -174,8 +174,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 58NQ7DA6UP;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "iOS-HW18-Olga Mikhailova/Info.plist";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "iOS-HW18-Olga Mikhailova/Resources/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
