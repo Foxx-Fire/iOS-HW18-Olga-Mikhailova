@@ -2,17 +2,48 @@ import UIKit
 
 final class PomodoroViewController: UIViewController {
     
+    //MARK: - Enums
+    
+    private enum Constants {
+        static let circleSize: CGFloat = 300
+        static let circleLineWidth: CGFloat = 10
+        static let labelHeight: CGFloat = 40
+        static let buttonSize: CGFloat = 40
+        static let buttonTopOffset: CGFloat = 55
+        static let labelCenterOffset: CGFloat = -20
+        static let circleInset: CGFloat = 20
+    }
+    
+    private enum Time {
+        static let workDuration: TimeInterval = 6
+        static let restDuration: TimeInterval = 3
+        static let timerInterval: TimeInterval = 0.05
+        static let colorTransitionDuration: TimeInterval = 0.3
+    }
+    
+    private enum Colors {
+        static let work = UIColor.red
+        static let rest = UIColor.green
+        static let background = UIColor.systemGray5
+        static let circleBackground = UIColor.systemGray4
+    }
+    
+    private enum Images {
+        static let play = UIImage(systemName: "play")
+        static let pause = UIImage(systemName: "pause")
+        static let symbolConfig = UIImage.SymbolConfiguration(pointSize: 30)
+    }
+    
     // MARK: - Timer Properties
     
     private var isWorkTime = true
     private var isStarted = false
     private var timer: Timer?
-    private let workDuration: TimeInterval = 6
-    private let restDuration: TimeInterval = 3
     private var currentTime: TimeInterval = 0
     private var startDate: Date?
     
-    // ProgressBar
+    // Layers
+    
     private let progressLayer = CAShapeLayer()
     private let backgroundLayer = CAShapeLayer()
     
@@ -20,15 +51,15 @@ final class PomodoroViewController: UIViewController {
     
     private lazy var circleView: UIView = {
         let circle = UIView()
-        circle.backgroundColor = .systemGray4
+        circle.backgroundColor = Colors.circleBackground
         circle.translatesAutoresizingMaskIntoConstraints = false
         return circle
     }()
     
     private lazy var timeLabel: UILabel = {
         let label = UILabel()
-        label.text = "06:00"
-        label.textColor = .red
+        label.text = timeString(from: Time.workDuration)
+        label.textColor = Colors.work
         label.font = .systemFont(ofSize: 45, weight: .medium)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -37,15 +68,12 @@ final class PomodoroViewController: UIViewController {
     
     private lazy var playStopButton: UIButton = {
         let button = UIButton(type: .system)
-        let config = UIImage.SymbolConfiguration(pointSize: 30)
-        button.setImage(UIImage(systemName: "play", withConfiguration: config),
-                       for: .normal)
-        button.tintColor = .red
+        button.setImage(Images.play?.withConfiguration(Images.symbolConfig), for: .normal)
+        button.tintColor = Colors.work
         button.contentVerticalAlignment = .fill
         button.contentHorizontalAlignment = .fill
         button.imageView?.contentMode = .scaleAspectFit
-        button.addTarget(self, action: #selector(buttonTapped),
-                        for: .touchUpInside)
+        button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -62,11 +90,11 @@ final class PomodoroViewController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        circleView.layer.cornerRadius = circleView.bounds.width / 2
+        setupCircleView()
         setupCircleLayers()
     }
     
-    // MARK: - Setups
+    // MARK: - Setup Methods
     
     private func setupView() {
         view.backgroundColor = .white
@@ -84,29 +112,31 @@ final class PomodoroViewController: UIViewController {
         NSLayoutConstraint.activate([
             circleView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             circleView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            circleView.widthAnchor.constraint(equalToConstant: 300),
-            circleView.heightAnchor.constraint(equalToConstant: 300),
+            circleView.widthAnchor.constraint(equalToConstant: Constants.circleSize),
+            circleView.heightAnchor.constraint(equalToConstant: Constants.circleSize),
             
-            timeLabel.heightAnchor.constraint(equalToConstant: 40),
+            timeLabel.heightAnchor.constraint(equalToConstant: Constants.labelHeight),
             timeLabel.centerXAnchor.constraint(equalTo: circleView.centerXAnchor),
             timeLabel.centerYAnchor.constraint(equalTo: circleView.centerYAnchor,
-                                              constant: -20),
+                                               constant: Constants.labelCenterOffset),
             
             playStopButton.topAnchor.constraint(equalTo: timeLabel.bottomAnchor,
-                                               constant: 55),
+                                                constant: Constants.buttonTopOffset),
             playStopButton.centerXAnchor.constraint(equalTo: circleView.centerXAnchor),
-            playStopButton.heightAnchor.constraint(equalToConstant: 40),
-            playStopButton.widthAnchor.constraint(equalToConstant: 40)
+            playStopButton.heightAnchor.constraint(equalToConstant: Constants.buttonSize),
+            playStopButton.widthAnchor.constraint(equalToConstant: Constants.buttonSize)
         ])
     }
     
-    // MARK: - Setup Circle
+    private func setupCircleView() {
+        circleView.layer.cornerRadius = Constants.circleSize / 2
+    }
     
     private func setupCircleLayers() {
-        let center = CGPoint(x: circleView.bounds.width/2,
-                            y: circleView.bounds.height/2)
-        let radius = min(circleView.bounds.width, circleView.bounds.height)/2 - 20
+        let center = CGPoint(x: Constants.circleSize/2, y: Constants.circleSize/2)
+        let radius = Constants.circleSize/2 - Constants.circleInset
         
+        // Background Layer
         let backgroundPath = UIBezierPath(
             arcCenter: center,
             radius: radius,
@@ -115,11 +145,12 @@ final class PomodoroViewController: UIViewController {
             clockwise: true
         )
         backgroundLayer.path = backgroundPath.cgPath
-        backgroundLayer.strokeColor = UIColor.systemGray5.cgColor
+        backgroundLayer.strokeColor = Colors.background.cgColor
         backgroundLayer.fillColor = UIColor.clear.cgColor
-        backgroundLayer.lineWidth = 10
+        backgroundLayer.lineWidth = Constants.circleLineWidth
         backgroundLayer.lineCap = .round
         
+        // Progress Layer
         let progressPath = UIBezierPath(
             arcCenter: center,
             radius: radius,
@@ -128,11 +159,21 @@ final class PomodoroViewController: UIViewController {
             clockwise: false
         )
         progressLayer.path = progressPath.cgPath
-        progressLayer.strokeColor = isWorkTime ? UIColor.red.cgColor : UIColor.green.cgColor
+        progressLayer.strokeColor = currentStrokeColor
         progressLayer.fillColor = UIColor.clear.cgColor
-        progressLayer.lineWidth = 10
+        progressLayer.lineWidth = Constants.circleLineWidth
         progressLayer.lineCap = .round
         progressLayer.strokeEnd = 1.0
+    }
+    
+    // MARK: - Helper Properties
+    
+    private var currentDuration: TimeInterval {
+        isWorkTime ? Time.workDuration : Time.restDuration
+    }
+    
+    private var currentStrokeColor: CGColor {
+        isWorkTime ? Colors.work.cgColor : Colors.rest.cgColor
     }
     
     // MARK: - Timer Control
@@ -147,9 +188,8 @@ final class PomodoroViewController: UIViewController {
         }
         
         startDate = Date().addingTimeInterval(-currentTime)
-        
         timer = Timer.scheduledTimer(
-            timeInterval: 0.05,
+            timeInterval: Time.timerInterval,
             target: self,
             selector: #selector(updateTimer),
             userInfo: nil,
@@ -158,7 +198,7 @@ final class PomodoroViewController: UIViewController {
         RunLoop.main.add(timer!, forMode: .common)
         
         isStarted = true
-        playStopButton.setImage(UIImage(systemName: "pause"), for: .normal)
+        updateButtonImage(to: Images.pause)
     }
     
     private func pauseTimer() {
@@ -171,7 +211,7 @@ final class PomodoroViewController: UIViewController {
         
         pauseAnimation()
         isStarted = false
-        playStopButton.setImage(UIImage(systemName: "play"), for: .normal)
+        updateButtonImage(to: Images.play)
     }
     
     private func resetToInitialState() {
@@ -184,28 +224,25 @@ final class PomodoroViewController: UIViewController {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         progressLayer.strokeEnd = 1.0
-        progressLayer.strokeColor = UIColor.red.cgColor
+        progressLayer.strokeColor = currentStrokeColor
         progressLayer.speed = 1.0
         progressLayer.timeOffset = 0.0
         progressLayer.beginTime = 0.0
         CATransaction.commit()
         
-        timeLabel.textColor = .red
-        playStopButton.tintColor = .red
-        playStopButton.setImage(UIImage(systemName: "play"), for: .normal)
-        timeLabel.text = "06:00"
+        updateUIForCurrentPhase()
+        timeLabel.text = timeString(from: Time.workDuration)
     }
     
     // MARK: - Animation
     
     private func startProgressAnimation() {
-        let duration = isWorkTime ? workDuration : restDuration
-        let fromValue = 1.0 - (currentTime / duration)
+        let fromValue = 1.0 - (currentTime / currentDuration)
         
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         progressLayer.strokeEnd = fromValue
-        progressLayer.strokeColor = isWorkTime ? UIColor.red.cgColor : UIColor.green.cgColor
+        progressLayer.strokeColor = currentStrokeColor
         progressLayer.speed = 1.0
         progressLayer.timeOffset = 0.0
         progressLayer.beginTime = 0.0
@@ -214,7 +251,7 @@ final class PomodoroViewController: UIViewController {
         let animation = CABasicAnimation(keyPath: "strokeEnd")
         animation.fromValue = fromValue
         animation.toValue = 0.0
-        animation.duration = duration - currentTime
+        animation.duration = currentDuration - currentTime
         animation.fillMode = .forwards
         animation.isRemovedOnCompletion = false
         animation.timingFunction = CAMediaTimingFunction(name: .linear)
@@ -237,13 +274,30 @@ final class PomodoroViewController: UIViewController {
         progressLayer.beginTime = timeSincePause
     }
     
+    // MARK: - UI Updates
+    
+    private func updateUIForCurrentPhase() {
+        timeLabel.textColor = isWorkTime ? Colors.work : Colors.rest
+        playStopButton.tintColor = isWorkTime ? Colors.work : Colors.rest
+    }
+    
+    private func updateButtonImage(to image: UIImage?) {
+        playStopButton.setImage(image, for: .normal)
+    }
+    
+    private func timeString(from timeInterval: TimeInterval) -> String {
+        let totalSeconds = Int(timeInterval.rounded())
+        return String(format: "%02d:%02d", totalSeconds / 60, totalSeconds % 60)
+    }
+    
+    // MARK: - Timer Updates
+    
     @objc private func updateTimer() {
         guard let startDate = startDate else { return }
         
         currentTime = Date().timeIntervalSince(startDate)
-        let duration = isWorkTime ? workDuration : restDuration
         
-        if currentTime >= duration {
+        if currentTime >= currentDuration {
             timer?.invalidate()
             switchPhase()
             return
@@ -253,10 +307,8 @@ final class PomodoroViewController: UIViewController {
     }
     
     private func updateTimeDisplay() {
-        let duration = isWorkTime ? workDuration : restDuration
-        let remaining = max(0.0, duration - currentTime)
-        let totalSeconds = Int(remaining.rounded())
-        timeLabel.text = String(format: "%02d:%02d", totalSeconds / 60, totalSeconds % 60)
+        let remaining = max(0.0, currentDuration - currentTime)
+        timeLabel.text = timeString(from: remaining)
     }
     
     private func switchPhase() {
@@ -268,15 +320,14 @@ final class PomodoroViewController: UIViewController {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         progressLayer.strokeEnd = 1.0
-        progressLayer.strokeColor = isWorkTime ? UIColor.red.cgColor : UIColor.green.cgColor
+        progressLayer.strokeColor = currentStrokeColor
         progressLayer.speed = 1.0
         progressLayer.timeOffset = 0.0
         progressLayer.beginTime = 0.0
         CATransaction.commit()
         
-        UIView.animate(withDuration: 0.3) {
-            self.timeLabel.textColor = self.isWorkTime ? .red : .green
-            self.playStopButton.tintColor = self.isWorkTime ? .red : .green
+        UIView.animate(withDuration: Time.colorTransitionDuration) {
+            self.updateUIForCurrentPhase()
         }
         
         if isStarted {
@@ -287,10 +338,6 @@ final class PomodoroViewController: UIViewController {
     }
     
     @objc private func buttonTapped() {
-        if isStarted {
-            pauseTimer()
-        } else {
-            startTimer()
-        }
+        isStarted ? pauseTimer() : startTimer()
     }
 }
