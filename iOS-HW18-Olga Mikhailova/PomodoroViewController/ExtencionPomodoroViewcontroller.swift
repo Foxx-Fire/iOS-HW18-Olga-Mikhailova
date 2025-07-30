@@ -1,13 +1,13 @@
+////
+////  ExtencionPomodoroViewcontroller.swift
+////  iOS-HW18-Olga Mikhailova
+////
+////  Created by FoxxFire on 30.07.2025.
+////
 //
-//  ExtencionPomodoroViewcontroller.swift
-//  iOS-HW18-Olga Mikhailova
-//
-//  Created by FoxxFire on 30.07.2025.
-//
-
 import UIKit
 
-private extension PomodoroViewController {
+extension PomodoroViewController {
     enum Constants {
         static let circleSize: CGFloat = 300
         static let circleLineWidth: CGFloat = 10
@@ -15,6 +15,7 @@ private extension PomodoroViewController {
         static let buttonSize: CGFloat = 40
         static let buttonTopOffset: CGFloat = 55
         static let labelCenterOffset: CGFloat = -20
+        static let circleInset: CGFloat = 20
     }
     
     enum Time {
@@ -28,6 +29,7 @@ private extension PomodoroViewController {
         static let work = UIColor.red
         static let rest = UIColor.green
         static let background = UIColor.systemGray5
+        static let circleBackground = UIColor.systemGray4
     }
     
     enum Images {
