@@ -16,26 +16,23 @@ final class PomodoroViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupView()
+        setupViews()
         setupHierarchy()
         setupLayout()
         resetToInitialState()
     }
     
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        setupCircleView()
-    }
-    
     // MARK: - Setups
     
-    private func setupView() {
+    private func setupViews() {
         view.backgroundColor = .white
+        
+        circleView.translatesAutoresizingMaskIntoConstraints = false
+        circleView.playStopButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
     }
     
     private func setupHierarchy() {
         view.addSubview(circleView)
-        circleView.playStopButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
     }
     
     private func setupLayout() {
@@ -47,10 +44,6 @@ final class PomodoroViewController: UIViewController {
         ])
     }
     
-    private func setupCircleView() {
-        circleView.layer.cornerRadius = Constants.circleSize / 2
-    }
-
     // MARK: - Helper Properties
     
     private var currentDuration: TimeInterval {
