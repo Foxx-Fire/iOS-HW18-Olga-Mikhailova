@@ -1,10 +1,9 @@
-////
-////  ExtencionPomodoroViewcontroller.swift
-////  iOS-HW18-Olga Mikhailova
-////
-////  Created by FoxxFire on 30.07.2025.
-////
 //
+//  ExtencionPomodoroViewcontroller.swift
+//  iOS-HW18-Olga Mikhailova
+//
+//  Created by FoxxFire on 30.07.2025.
+
 import UIKit
 
 extension PomodoroViewController {
@@ -38,3 +37,4 @@ extension PomodoroViewController {
         static let symbolConfig = UIImage.SymbolConfiguration(pointSize: 30)
     }
 }
+
