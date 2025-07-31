@@ -14,46 +14,46 @@ final class PomodoroCircleView: UIView {
     let backgroundLayer = CAShapeLayer()
     
     // MARK: - UI Elements
-    let timeLabel: UILabel = {
-        let label = UILabel()
-        label.textColor = PomodoroViewController.Colors.work
-        label.font = .systemFont(ofSize: 45, weight: .medium)
-        label.textAlignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    let playStopButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(
-            PomodoroViewController.Images.play?.withConfiguration(
-                PomodoroViewController.Images.symbolConfig
-            ),
-            for: .normal
-        )
-        button.tintColor = PomodoroViewController.Colors.rest
-        button.contentVerticalAlignment = .fill
-        button.contentHorizontalAlignment = .fill
-        button.imageView?.contentMode = .scaleAspectFit
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
+    let timeLabel = UILabel()
+    let playStopButton = UIButton(type: .system)
     
     // MARK: - Init
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = PomodoroViewController.Colors.circleBackground
-        translatesAutoresizingMaskIntoConstraints = false
-        layer.addSublayer(backgroundLayer)
-        layer.addSublayer(progressLayer)
-        addSubview(timeLabel)
-        addSubview(playStopButton)
+        setupViews()
         setupLayout()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupViews() {
+        backgroundColor = PomodoroViewController.Colors.circleBackground
+        
+        layer.addSublayer(backgroundLayer)
+        layer.addSublayer(progressLayer)
+        
+        timeLabel.textColor = PomodoroViewController.Colors.work
+        timeLabel.font = .systemFont(ofSize: 45, weight: .medium)
+        timeLabel.textAlignment = .center
+        timeLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        playStopButton.setImage(
+            PomodoroViewController.Images.play?.withConfiguration(
+                PomodoroViewController.Images.symbolConfig
+            ),
+            for: .normal
+        )
+        playStopButton.tintColor = PomodoroViewController.Colors.work
+        playStopButton.contentVerticalAlignment = .fill
+        playStopButton.contentHorizontalAlignment = .fill
+        playStopButton.imageView?.contentMode = .scaleAspectFit
+        playStopButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        addSubview(timeLabel)
+        addSubview(playStopButton)
     }
     
     // MARK: - Layout
@@ -77,7 +77,6 @@ final class PomodoroCircleView: UIView {
             
             playStopButton.topAnchor.constraint(
                 equalTo: timeLabel.bottomAnchor,
-                                                
                 constant: PomodoroViewController.Constants.buttonTopOffset
             ),
             playStopButton.centerXAnchor.constraint(equalTo: centerXAnchor),
@@ -95,7 +94,7 @@ final class PomodoroCircleView: UIView {
     private func setupCircleLayers() {
         let center = CGPoint(x: bounds.width / 2, y: bounds.height / 2)
         let radius = bounds.width / 2 - PomodoroViewController.Constants.circleInset
-
+        
         let backgroundPath = UIBezierPath(
             arcCenter: center,
             radius: radius,
