@@ -11,6 +11,18 @@ final class PomodoroViewController: UIViewController {
     private var timer: Timer?
     private var currentTime: TimeInterval = 0
     private var startDate: Date?
+    private var isTransitioning = false
+    
+    // MARK: - Helper Properties
+    
+    private var currentDuration: TimeInterval {
+        isWorkMode ? Time.workDuration : Time.restDuration
+    }
+    
+    private var currentStrokeColor: CGColor {
+        isWorkMode ? Colors.work.cgColor : Colors.rest.cgColor
+    }
+    
     
     // MARK: - Lifecycle
     
@@ -28,7 +40,12 @@ final class PomodoroViewController: UIViewController {
         view.backgroundColor = .white
         
         circleView.translatesAutoresizingMaskIntoConstraints = false
-        circleView.playStopButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+        circleView.playStopButton.addAction(
+            UIAction { [weak self] _ in
+                self?.buttonTapped()
+            },
+            for: .touchUpInside
+        )
     }
     
     private func setupHierarchy() {
@@ -42,16 +59,6 @@ final class PomodoroViewController: UIViewController {
             circleView.widthAnchor.constraint(equalToConstant: Constants.circleSize),
             circleView.heightAnchor.constraint(equalToConstant: Constants.circleSize)
         ])
-    }
-    
-    // MARK: - Helper Properties
-    
-    private var currentDuration: TimeInterval {
-        isWorkMode ? Time.workDuration : Time.restDuration
-    }
-    
-    private var currentStrokeColor: CGColor {
-        isWorkMode ? Colors.work.cgColor : Colors.rest.cgColor
     }
     
     // MARK: - Timer Control
@@ -218,6 +225,46 @@ final class PomodoroViewController: UIViewController {
     }
     
     @objc private func buttonTapped() {
+        guard !isTransitioning else { return }
+        isTransitioning = true
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.isTransitioning = false
+        }
+        
         isRunning ? pauseTimer() : startTimer()
     }
 }
+
+extension PomodoroViewController {
+    enum Constants {
+        static let circleSize: CGFloat = 300
+        static let circleLineWidth: CGFloat = 10
+        static let labelHeight: CGFloat = 40
+        static let buttonSize: CGFloat = 40
+        static let buttonTopOffset: CGFloat = 55
+        static let labelCenterOffset: CGFloat = -20
+        static let circleInset: CGFloat = 20
+    }
+    
+    enum Time {
+        static let workDuration: TimeInterval = 6
+        static let restDuration: TimeInterval = 3
+        static let timerInterval: TimeInterval = 0.05
+        static let colorTransitionDuration: TimeInterval = 0.3
+    }
+    
+    enum Colors {
+        static let work = UIColor.red
+        static let rest = UIColor.green
+        static let background = UIColor.systemGray5
+        static let circleBackground = UIColor.systemGray4
+    }
+    
+    enum Images {
+        static let play = UIImage(systemName: "play")
+        static let pause = UIImage(systemName: "pause")
+        static let symbolConfig = UIImage.SymbolConfiguration(pointSize: 30)
+    }
+}
+
